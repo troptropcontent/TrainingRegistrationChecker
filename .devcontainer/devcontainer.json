@@ -1,12 +1,16 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/go-postgres
 {
-	"name": "Go & PostgreSQL",
+	"name": "TrainingRegistrationChecker",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	"features": {
-		"ghcr.io/devcontainers/features/github-cli:1": {}
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/ruby": {},
+		"ghcr.io/devcontainers/features/docker-in-docker": {
+			"moby": false
+		}
 	}
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
