@@ -2,12 +2,29 @@ package db
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-const DATABASE_FILE = "database.db"
+const DEFAULT_DATABASE_FILE = "database.db"
+
+func getDatabasePath() string {
+	if path := os.Getenv("DATABASE_PATH"); path != "" {
+		return path
+	}
+	return DEFAULT_DATABASE_FILE
+}
+
+func ensureDir(filePath string) error {
+	dir := filepath.Dir(filePath)
+	if dir == "." {
+		return nil
+	}
+	return os.MkdirAll(dir, 0755)
+}
 
 type LogLevel string
 
@@ -24,7 +41,13 @@ type Log struct {
 }
 
 func MustConnect() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(DATABASE_FILE), &gorm.Config{})
+	dbPath := getDatabasePath()
+
+	if err := ensureDir(dbPath); err != nil {
+		log.Fatalf("failed to create database directory: %v", err)
+	}
+
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
