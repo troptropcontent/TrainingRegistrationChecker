@@ -16,7 +16,7 @@ COPY . .
 RUN go build -o /app/checker .
 
 # Runtime stage
-FROM alpine:latest
+FROM debian:bookworm-slim
 
 WORKDIR /app
 
