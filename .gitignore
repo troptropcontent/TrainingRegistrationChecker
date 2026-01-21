@@ -2,3 +2,4 @@ simon_bsc_checker
 .env
 .devcontainer/.env
 .devcontainer/.env
+database.db
