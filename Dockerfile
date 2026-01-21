@@ -1,5 +1,7 @@
 # Build stage
-FROM golang:1.25-alpine AS builder
+FROM golang:1.25 AS builder
+
+RUN apt-get update && apt-get install -y build-essential 
 
 WORKDIR /app
 
