@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -13,22 +12,14 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
-// Notifier constants and types
+// Notifier constants
 const BASE_NTFY_URL = "https://ntfy.sh/"
+const NTFY_CHANNEL_ENV = "NTFY_CHANNEL"
 
-type Channel string
-
-const (
-	Success Channel = "NTFY_SUCCESS_CHANNEL"
-	Logs    Channel = "NTFY_LOGS_CHANNEL"
-)
-
-func notify(message string, channel Channel) error {
-	log.Printf("[%s] %s", channel, message)
-
-	ntfyChannel := os.Getenv(string(channel))
+func notify(message string) error {
+	ntfyChannel := os.Getenv(NTFY_CHANNEL_ENV)
 	if ntfyChannel == "" {
-		return fmt.Errorf("environment variable %s is not set", channel)
+		return fmt.Errorf("environment variable %s is not set", NTFY_CHANNEL_ENV)
 	}
 
 	ntfyURL := BASE_NTFY_URL + ntfyChannel
@@ -38,9 +29,7 @@ func notify(message string, channel Channel) error {
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
-	log.Printf("[%s] ntfy response: %s (status: %d)", channel, string(body), resp.StatusCode)
-
+	log.Printf("ntfy notification sent (status: %d)", resp.StatusCode)
 	return nil
 }
 
@@ -78,24 +67,24 @@ func isRegistrationOpen() (bool, error) {
 func main() {
 	log.Printf("Spining checker off ...")
 
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		notify("Checking registration status...", Logs)
+		log.Printf("Checking registration status...")
 
 		open, err := isRegistrationOpen()
 		if err != nil {
-			notify(fmt.Sprintf("Error checking registration: %v", err), Logs)
+			log.Printf("Error checking registration: %v", err)
 			continue
 		}
 
 		if open {
-			notify("Registration is open!", Success)
+			notify("Registration is open!")
 			log.Printf("Turning checker down ...")
 			return
 		}
 
-		notify("Registration is closed!", Logs)
+		log.Printf("Registration is closed.")
 	}
 }
