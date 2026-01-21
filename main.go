@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -31,10 +32,14 @@ func notify(message string, channel Channel) error {
 	}
 
 	ntfyURL := BASE_NTFY_URL + ntfyChannel
-	_, err := http.Post(ntfyURL, "text/plain", strings.NewReader(message))
+	resp, err := http.Post(ntfyURL, "text/plain", strings.NewReader(message))
 	if err != nil {
 		return fmt.Errorf("unable to send notification: %v", err)
 	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	log.Printf("[%s] ntfy response: %s (status: %d)", channel, string(body), resp.StatusCode)
 
 	return nil
 }
@@ -73,7 +78,7 @@ func isRegistrationOpen() (bool, error) {
 func main() {
 	log.Printf("Spining checker off ...")
 
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
 	for range ticker.C {
