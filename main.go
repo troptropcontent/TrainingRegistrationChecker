@@ -81,8 +81,8 @@ func main() {
 
 		if open {
 			notify("Registration is open!")
-			log.Printf("Turning checker down ...")
-			return
+			// log.Printf("Turning checker down ...")
+			// return
 		}
 
 		log.Printf("Registration is closed.")
